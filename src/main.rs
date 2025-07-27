@@ -1,6 +1,6 @@
 use config::categories::get_categories as get_cf_categories;
 use salvo::prelude::*;
-use sqlx::{PgPool, SqlitePool};
+use sqlx::SqlitePool;
 use std::sync::OnceLock;
 use tokio::sync::{OnceCell, RwLock};
 
@@ -10,8 +10,6 @@ mod auth;
 mod cachewrapper;
 mod cli;
 mod config;
-mod database;
-mod db;
 mod diskcache;
 mod error;
 mod filters;
@@ -24,17 +22,11 @@ mod services;
 
 use auth::Auth;
 use cachewrapper::CacheWrapper;
-use db::make_db_pool;
 use error::AppResult;
 use models::{catalog::Catalog, category::Category};
 
 pub const VERSION: &str = env!("CARGO_PKG_VERSION");
 
-static POSTGRES_DB: OnceLock<PgPool> = OnceLock::new();
-#[inline]
-pub fn get_db_pool() -> &'static PgPool {
-    POSTGRES_DB.get().unwrap()
-}
 
 static SQLITE_CONF: OnceLock<SqlitePool> = OnceLock::new();
 #[inline]
@@ -119,12 +111,6 @@ async fn main() -> AppResult<()> {
     let auth = initialize_auth(&app_config.config_dir, &cf_pool).await?;
     let catalog = initialize_catalog(&cf_pool).await?;
 
-    let db_pool = make_db_pool(
-        &app_config.db_conn,
-        app_config.db_pool_size_min,
-        app_config.db_pool_size_max,
-    )
-    .await?;
 
     let categories = get_cf_categories(Some(&cf_pool)).await?;
     let parquet_datasets = config::parquet::load_parquet_config(&app_config.config_dir)
@@ -136,7 +122,6 @@ async fn main() -> AppResult<()> {
     )
     .await?;
 
-    POSTGRES_DB.set(db_pool).unwrap();
     SQLITE_CONF.set(cf_pool).unwrap();
     MAP_ASSETS_DIR
         .set(app_config.map_assets_dir.clone())

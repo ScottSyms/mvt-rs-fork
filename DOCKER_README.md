@@ -1,6 +1,6 @@
 # MVT-Server Docker Setup
 
-Este proyecto incluye configuración completa de Docker para ejecutar MVT-RS con PostgreSQL+PostGIS y Redis.
+Este proyecto incluye configuración de Docker para ejecutar MVT-RS junto a Redis.
 
 ## Requisitos
 
@@ -25,16 +25,9 @@ mvt-rs/
 ### 1. mvt-server
 - **Puerto**: 5880
 - **Descripción**: Aplicación principal MVT-RS
-- **Dependencias**: PostgreSQL, Redis
+- **Dependencias**: Redis
 
-### 2. postgres
-- **Puerto**: 5432
-- **Imagen**: postgis/postgis:15-3.4
-- **Base de datos**: mvtdb
-- **Usuario**: mvtuser
-- **Contraseña**: mvtpass
-
-### 3. redis
+### 2. redis
 - **Puerto**: 6379
 - **Imagen**: redis:7-alpine
 - **Funcionalidad**: Caché para tiles
@@ -58,8 +51,6 @@ docker-compose logs -f
 # Solo MVT-RS
 docker-compose logs -f mvt-server
 
-# Solo PostgreSQL
-docker-compose logs -f postgres
 ```
 
 ### Detener servicios
@@ -78,8 +69,6 @@ docker-compose up -d
 # MVT-RS
 docker-compose exec mvt-server bash
 
-# PostgreSQL
-docker-compose exec postgres psql -U mvtuser -d mvtdb
 ```
 
 ## Configuración
@@ -90,9 +79,6 @@ Las siguientes variables están configuradas en `docker-compose.yml`:
 
 ```yaml
 environment:
-  # Base de datos
-  DBCONN: "postgres://mvtuser:mvtpass@postgres:5432/mvtdb"
-  
   # Redis (opcional)
   REDISCONN: "redis://redis:6379"
   
@@ -124,50 +110,11 @@ Una vez iniciados los servicios:
 
 - **MVT-RS**: http://localhost:5880
 - **Adminer**: http://localhost:8080
-- **PostgreSQL**: localhost:5432
 - **Redis**: localhost:6379
 
 ## Configuración de datos geoespaciales
 
-### Conectar a PostgreSQL y configurar datos
 
-1. Accede a Adminer: http://localhost:8080
-   - **Sistema**: PostgreSQL
-   - **Servidor**: postgres
-   - **Usuario**: mvtuser
-   - **Contraseña**: mvtpass
-   - **Base de datos**: mvtdb
-
-2. Crear tabla de ejemplo:
-```sql
--- Crear tabla de ejemplo
-CREATE TABLE public.example_points (
-    id SERIAL PRIMARY KEY,
-    name VARCHAR(100),
-    description TEXT,
-    geom GEOMETRY(POINT, 4326)
-);
-
--- Insertar datos de ejemplo
-INSERT INTO public.example_points (name, description, geom) VALUES 
-('Punto 1', 'Descripción del punto 1', ST_GeomFromText('POINT(-58.3816 -34.6037)', 4326)),
-('Punto 2', 'Descripción del punto 2', ST_GeomFromText('POINT(-58.3700 -34.6100)', 4326));
-
--- Crear índice espacial
-CREATE INDEX idx_example_points_geom ON public.example_points USING GIST (geom);
-```
-
-### Configurar capa en MVT-RS
-
-1. Accede a la interfaz web: http://localhost:5880
-2. Configura una nueva capa con los datos de ejemplo
-3. Publica la capa como vector tiles
-
-## Volúmenes persistentes
-
-Los datos se mantienen en volúmenes Docker:
-
-- `postgres_data`: Datos de PostgreSQL
 - `redis_data`: Datos de Redis
 - `./config`: Configuraciones de MVT-RS
 - `./cache`: Caché de tiles
@@ -208,7 +155,7 @@ Para producción, asegúrate de:
 2. **Usar variables de entorno** en lugar de valores hardcodeados
 3. **Configurar proxy reverso** (nginx, traefik)
 4. **Habilitar SSL/TLS**
-5. **Configurar backups** de PostgreSQL
+5. **Configurar backups** de Redis
 6. **Monitorear recursos** y logs
 
 ### Ejemplo de producción con nginx
@@ -221,7 +168,6 @@ services:
   mvt-server:
     build: .
     environment:
-      DBCONN: "${DB_CONNECTION_STRING}"
       JWTSECRET: "${JWT_SECRET}"
       SESSIONSECRET: "${SESSION_SECRET}"
     networks:

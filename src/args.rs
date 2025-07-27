@@ -9,12 +9,9 @@ pub struct AppConfig {
     pub map_assets_dir: String,
     pub host: String,
     pub port: String,
-    pub db_conn: String,
     pub redis_conn: String,
     pub jwt_secret: String,
     pub session_secret: String,
-    pub db_pool_size_min: u32,
-    pub db_pool_size_max: u32,
     pub config_cli: bool,
 }
 
@@ -58,13 +55,6 @@ pub async fn parse_args() -> AppResult<AppConfig> {
                 .help("Bind port"),
         )
         .arg(
-            Arg::new("dbconn")
-                .short('d')
-                .long("dbconn")
-                .value_name("DBCONN")
-                .help("Database connection"),
-        )
-        .arg(
             Arg::new("redisconn")
                 .short('r')
                 .long("redisconn")
@@ -84,20 +74,6 @@ pub async fn parse_args() -> AppResult<AppConfig> {
                 .long("sessionsecret")
                 .value_name("SESSIONSECRET")
                 .help("Session secret key"),
-        )
-        .arg(
-            Arg::new("dbpoolmin")
-                .short('n')
-                .long("dbpoolmin")
-                .value_name("DBPOOLMIN")
-                .help("Minimum database pool size"),
-        )
-        .arg(
-            Arg::new("dbpoolmax")
-                .short('x')
-                .long("dbpoolmax")
-                .value_name("DBPOOLMAX")
-                .help("Maximum database pool size"),
         )
         .arg(
             Arg::new("config_cli")
@@ -130,17 +106,9 @@ pub async fn parse_args() -> AppResult<AppConfig> {
     let map_assets_dir = get_value("MAPASSETS", "mapassetsdir", Some("map_assets"));
     let host = get_value("IPHOST", "host", Some("0.0.0.0"));
     let port = get_value("PORT", "port", Some("5800"));
-    let db_conn = get_value("DBCONN", "dbconn", None);
     let redis_conn = get_value("REDISCONN", "redisconn", Some(""));
     let jwt_secret = get_value("JWTSECRET", "jwtsecret", None);
     let session_secret = get_value("SESSIONSECRET", "sessionsecret", None);
-
-    let db_pool_size_min: u32 = get_value("POOLSIZEMIN", "dbpoolmin", Some("2"))
-        .parse()
-        .expect("Invalid POOLSIZEMIN value");
-    let db_pool_size_max: u32 = get_value("POOLSIZEMAX", "dbpoolmax", Some("5"))
-        .parse()
-        .expect("Invalid POOLSIZEMAX value");
 
     Ok(AppConfig {
         config_dir,
@@ -148,12 +116,9 @@ pub async fn parse_args() -> AppResult<AppConfig> {
         map_assets_dir,
         host,
         port,
-        db_conn,
         redis_conn,
         jwt_secret,
         session_secret,
-        db_pool_size_min,
-        db_pool_size_max,
         config_cli,
     })
 }
