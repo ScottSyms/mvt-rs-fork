@@ -34,7 +34,6 @@ MVT Server not only allows you to publish geographic layers in vector tile forma
 
 ## Requirements
 - Operating System (Freebsd, Linux, Windows)
-- Access to a PostgreSQL server with PostGIS version 3.0.0 or higher installed, either local or remote. The **MVT Server** will be able to publish geographic layers as vector tiles.
 - Port `5800` available (or configurable)
 
 ## Installation / Compilation
@@ -73,9 +72,6 @@ Options:
   -m, --mapassets <MAPASSETS>          Directory where map_assets files are placed [default: map_assets]
   -i, --host <HOST>                    Bind address [default: 0.0.0.0]
   -p, --port <PORT>                    Bind port [default: 5800]
-  -d, --dbconn <DBCONN>                Database connection
-  -n, --dbpoolmin <DBPOOLMIN>          Minimum database pool size [default: 2]
-  -x, --dbpoolmax <DBPOOLMAX>          Maximum database pool size [default: 5]
   -r, --redisconn <REDISCONN>          Redis connection
   -j, --jwtsecret <JWTSECRET>          JWT secret key
   -s, --sessionsecret <SESSIONSECRET>  Session secret key
@@ -91,9 +87,6 @@ Options:
   --mapassets mapassets_folder \
   --host 127.0.0.1 \
   --port 8000 \
-  --dbconn "postgres://user:password@localhost:5432/mydb" \
-  --dbpoolmin 5 \
-  --dbpoolmax 20 \
   --redisconn "redis://127.0.0.1:6379" \
   --jwtsecret "supersecretjwt" \
   --sessionsecret "supersecretsession"
@@ -113,12 +106,6 @@ To launch it, simply run:
 **Make sure to create a `.env` file at the root of your project with the following variables:**
 
 ```sh
-# Database connection URL (PostgreSQL)
-DBCONN=postgres://user:pass@host:port/db
-
-# Connection pool size
-POOLSIZEMIN=3   # Minimum size of the connection pool
-POOLSIZEMAX=5   # Maximum size of the connection pool
 
 # Server settings
 IPHOST=0.0.0.0  # The IP address where the server will listen
@@ -258,7 +245,7 @@ The MVT Server administration panel gives you complete control over the publicat
 
 The "Name" field must contain a single word preferably in lowercase. In "Alias", you can enter a more descriptive label.
 
-The form allows you to list available schemas in the PostgreSQL database. After selecting a schema, the tables (geographic layers) will be displayed. Finally, once a table is selected, its fields will be shown. It is recommended to publish only the necessary fields.
+The form allows you to list available schemas from your data source. After selecting a schema, the tables (geographic layers) will be displayed. Finally, once a table is selected, its fields will be shown. It is recommended to publish only the necessary fields.
 
 It is also advisable to properly configure ZMin and ZMax to improve performance. For example, setting ZMin = 0 for a small locality layer is unnecessary. After adding the layer, you can use the map to assign appropriate zoom values.
 

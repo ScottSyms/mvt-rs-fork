@@ -6,7 +6,6 @@ use tokio::fs;
 
 use crate::{
     auth::User,
-    database::{Extent, query_extent},
     error::{AppError, AppResult},
     get_auth, get_catalog, get_map_assets,
     models::{
@@ -14,6 +13,14 @@ use crate::{
         styles::Style,
     },
 };
+
+#[derive(Clone, Copy)]
+struct Extent {
+    xmin: f64,
+    ymin: f64,
+    xmax: f64,
+    ymax: f64,
+}
 
 pub struct BaseTemplateData {
     pub is_auth: bool,
@@ -309,15 +316,12 @@ pub async fn page_map_layer(
         (lyr, geometry)
     };
 
-    let extent = query_extent(&lyr).await.unwrap_or_else(|e| {
-        tracing::error!("Error querying extent: {:?}", e);
-        Extent {
-            xmin: -180.0,
-            ymin: -90.0,
-            xmax: 180.0,
-            ymax: 90.0,
-        }
-    });
+    let extent = Extent {
+        xmin: -180.0,
+        ymin: -90.0,
+        xmax: 180.0,
+        ymax: 90.0,
+    };
 
     let template = MapLayerTemplate {
         geometry: &geometry,

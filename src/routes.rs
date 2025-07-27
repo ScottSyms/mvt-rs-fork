@@ -10,7 +10,7 @@ use std::time::Duration;
 use crate::{
     api, args, auth, html,
     i18n::i18n_middleware,
-    services::{health, legends, styles, tiles, parquet_tiles},
+    services::{health, legends, styles, parquet_tiles},
 };
 
 const STATIC_DIR: Dir = include_dir!("$CARGO_MANIFEST_DIR/static");
@@ -203,20 +203,6 @@ pub fn app_router(app_config: &args::AppConfig) -> Service {
                                         .get(html::admin::catalog::delete_layer_cache),
                                 ),
                         )
-                        .push(
-                            Router::with_path("database")
-                                .push(
-                                    Router::with_path("schemas")
-                                        .get(html::admin::database::schemas),
-                                )
-                                .push(
-                                    Router::with_path("tables").get(html::admin::database::tables),
-                                )
-                                .push(
-                                    Router::with_path("fields").get(html::admin::database::fields),
-                                )
-                                .push(Router::with_path("srid").get(html::admin::database::srid)),
-                        ),
                 ),
         )
         .push(
@@ -239,22 +225,6 @@ pub fn app_router(app_config: &args::AppConfig) -> Service {
                             ),
                         )
                         .push(
-                            Router::with_path("database")
-                                .hoop(auth::validate_token)
-                                .push(Router::with_path("schemas").get(api::database::schemas))
-                                .push(
-                                    Router::with_path("tables/{schema}").get(api::database::tables),
-                                )
-                                .push(
-                                    Router::with_path("fields/{schema}/{table}")
-                                        .get(api::database::fields),
-                                )
-                                .push(
-                                    Router::with_path("srid/{schema}/{table}/{geometry}")
-                                        .get(api::database::srid),
-                                ),
-                        )
-                        .push(
                             Router::with_path("catalog/layer")
                                 .hoop(auth::validate_token)
                                 .get(api::catalog::list)
@@ -273,18 +243,6 @@ pub fn app_router(app_config: &args::AppConfig) -> Service {
                 .hoop(cache_30s)
                 .hoop(cors_handler)
                 .options(handler::empty())
-                .push(
-                    Router::with_path("tiles/{layer_name}/{z}/{x}/{y}.pbf")
-                        .get(tiles::get_single_layer_tile),
-                )
-                .push(
-                    Router::with_path("tiles/multi/{layers}/{z}/{x}/{y}.pbf")
-                        .get(tiles::get_composite_layers_tile),
-                )
-                .push(
-                    Router::with_path("tiles/category/{category}/{z}/{x}/{y}.pbf")
-                        .get(tiles::get_category_layers_tile),
-                )
                 .push(
                     Router::with_path("tiles/parquet/{dataset}/{z}/{x}/{y}.pbf")
                         .get(parquet_tiles::get_parquet_tile),

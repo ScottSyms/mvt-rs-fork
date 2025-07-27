@@ -8,12 +8,10 @@ This is a simple and high-speed vector tile server developed in Rust, using the 
 
 **MVT Server** will allow you to publish any table or view with a geometry field as vector tiles through the definition in the layers' configuration. It will also enable the publication of styles to be used in tools like QGIS. These styles define how layers are displayed, including visualization scales, colors, labels, and other visual elements. This functionality ensures seamless integration with GIS tools, guaranteeing that vector tiles are rendered consistently and as intended across different platforms.
 
-Requires a PostgreSQL server with PostGIS version 3.0.0 or higher, either local or remote. It relies on the use of the PostGIS function ST_AsMVT. More information can be found at https://postgis.net/docs/en/ST_AsMVT.html.
 
 ## Key Features
 
 - Layer server, maps server (through Maplibre Style) and legends server.
-- On-the-fly vector tile generation using PostgreSQL/PostGIS.
 - Generate tiles directly from collections of Parquet files.
 - Web-based administration for managing users, groups, layers, styles, categories, and more.
 - Integrated caching with support for disk or Redis storage.
@@ -47,12 +45,6 @@ To launch it, simply run:
 
 
 ```sh
-# Database connection URL (PostgreSQL)
-DBCONN=postgres://user:pass@host:port/db
-
-# Connection pool size
-POOLSIZEMIN=3   # Minimum size of the connection pool
-POOLSIZEMAX=5   # Maximum size of the connection pool
 
 # Server settings
 IPHOST=0.0.0.0  # The IP address where the server will listen
@@ -126,9 +118,6 @@ Options:
   -m, --mapassets <MAPASSETS>          Directory where map_assets files are placed [default: map_assets]
   -i, --host <HOST>                    Bind address [default: 0.0.0.0]
   -p, --port <PORT>                    Bind port [default: 5800]
-  -d, --dbconn <DBCONN>                Database connection
-  -n, --dbpoolmin <DBPOOLMIN>          Minimum database pool size [default: 2]
-  -x, --dbpoolmax <DBPOOLMAX>          Maximum database pool size [default: 5]
   -r, --redisconn <REDISCONN>          Redis connection
   -j, --jwtsecret <JWTSECRET>          JWT secret key
   -s, --sessionsecret <SESSIONSECRET>  Session secret key
@@ -144,9 +133,6 @@ Options:
   --mapassets mapassets_folder \
   --host 127.0.0.1 \
   --port 8000 \
-  --dbconn "postgres://user:password@localhost:5432/mydb" \
-  --dbpoolmin 5 \
-  --dbpoolmax 20 \
   --redisconn "redis://127.0.0.1:6379" \
   --jwtsecret "supersecretjwt" \
   --sessionsecret "supersecretsession"
