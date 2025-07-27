@@ -14,6 +14,7 @@ Requires a PostgreSQL server with PostGIS version 3.0.0 or higher, either local 
 
 - Layer server, maps server (through Maplibre Style) and legends server.
 - On-the-fly vector tile generation using PostgreSQL/PostGIS.
+- Generate tiles directly from collections of Parquet files.
 - Web-based administration for managing users, groups, layers, styles, categories, and more.
 - Integrated caching with support for disk or Redis storage.
 - Granular cache control at the layer level.
@@ -68,6 +69,7 @@ SESSIONSECRET=supersecretsession # Secret key for session management
 CONFIG=/path_to/config_dir             # Directory path for configuration files
 CACHE=/path_to/cache_dir               # Directory path for cache storage
 MAPASSETS=/path_to/map_assets_dir      # Directory path for map_assets storage
+# Parquet configuration file should be placed as parquet.json in CONFIG directory
 ```
 
 Remember the `.env` file has to kept secure and not shared in public repositories.
@@ -148,6 +150,13 @@ Options:
   --redisconn "redis://127.0.0.1:6379" \
   --jwtsecret "supersecretjwt" \
   --sessionsecret "supersecretsession"
+```
+
+Tiles can also be generated from Parquet datasets by placing a `parquet.json`
+file inside your config directory. Access them through:
+
+```
+/services/tiles/parquet/{dataset}/{z}/{x}/{y}.pbf
 ```
 
 
