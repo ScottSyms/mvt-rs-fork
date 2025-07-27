@@ -78,6 +78,13 @@ pub async fn get_auth() -> &'static RwLock<Auth> {
     AUTH.get().unwrap()
 }
 
+use config::parquet::ParquetDataset;
+static PARQUET_DATASETS: OnceCell<RwLock<Vec<ParquetDataset>>> = OnceCell::const_new();
+#[inline]
+pub async fn get_parquet_datasets() -> &'static RwLock<Vec<ParquetDataset>> {
+    PARQUET_DATASETS.get().unwrap()
+}
+
 async fn initialize_auth(config_dir: &str, pool: &SqlitePool) -> AppResult<Auth> {
     let auth = Auth::new(config_dir, pool).await?;
     Ok(auth)
@@ -120,6 +127,8 @@ async fn main() -> AppResult<()> {
     .await?;
 
     let categories = get_cf_categories(Some(&cf_pool)).await?;
+    let parquet_datasets = config::parquet::load_parquet_config(&app_config.config_dir)
+        .unwrap_or_default();
     let cache_wrapper = cachewrapper::initialize_cache(
         Some(app_config.redis_conn.clone()),
         app_config.cache_dir.clone().into(),
@@ -136,6 +145,7 @@ async fn main() -> AppResult<()> {
     CACHE_WRAPPER.set(cache_wrapper).unwrap();
     CATALOG.set(RwLock::new(catalog)).unwrap();
     CATEGORIES.set(RwLock::new(categories)).unwrap();
+    PARQUET_DATASETS.set(RwLock::new(parquet_datasets)).unwrap();
     AUTH.set(RwLock::new(auth)).unwrap();
 
     let acceptor = TcpListener::new(format!("{}:{}", app_config.host, app_config.port))

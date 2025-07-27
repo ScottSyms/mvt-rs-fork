@@ -1,0 +1,10 @@
+{
+  "datasets": [
+    {
+      "name": "example",
+      "directory": "/data/parquets",
+      "lat_col": "lat",
+      "lon_col": "lon"
+    }
+  ]
+}

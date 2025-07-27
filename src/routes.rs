@@ -10,7 +10,7 @@ use std::time::Duration;
 use crate::{
     api, args, auth, html,
     i18n::i18n_middleware,
-    services::{health, legends, styles, tiles},
+    services::{health, legends, styles, tiles, parquet_tiles},
 };
 
 const STATIC_DIR: Dir = include_dir!("$CARGO_MANIFEST_DIR/static");
@@ -284,6 +284,10 @@ pub fn app_router(app_config: &args::AppConfig) -> Service {
                 .push(
                     Router::with_path("tiles/category/{category}/{z}/{x}/{y}.pbf")
                         .get(tiles::get_category_layers_tile),
+                )
+                .push(
+                    Router::with_path("tiles/parquet/{dataset}/{z}/{x}/{y}.pbf")
+                        .get(parquet_tiles::get_parquet_tile),
                 )
                 .push(Router::with_path("styles/{style_name}").get(styles::index))
                 .push(Router::with_path("legends/{style_name}").get(legends::index))
