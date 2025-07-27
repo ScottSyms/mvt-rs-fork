@@ -3,6 +3,7 @@ use ::maplibre_legend::LegendError;
 use askama::Template;
 use bb8::RunError;
 use bb8_redis::redis::RedisError;
+use polars::error::PolarsError;
 use salvo::prelude::*;
 use std::num::TryFromIntError;
 use thiserror::Error;
@@ -89,6 +90,9 @@ pub enum AppError {
 
     #[error("Timeout error")]
     TimeoutError,
+
+    #[error("Polars error: {0}")]
+    Polars(#[from] PolarsError),
 
     #[error("MapLibre legend error: {0}")]
     Legend(#[from] LegendError),
